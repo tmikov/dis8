@@ -1,0 +1,64 @@
+*********************************************
+**  Definitions for 8031 general programs
+*********************************************
+
+--------- IRAM equates -----------------------
+'P0'    80
+'SP'    81
+'DPL'   82
+'DPH'   83
+'PCON'  87
+'TCON'  88
+'TMOD'  89
+'TL0'   8A
+'TL1'   8B
+'TH0'   8C
+'TH1'   8D
+'P1'    90
+'SCON'  98
+'SBUF'  99
+'P2'    A0
+'IE'    A8
+'P3'    B0
+'IP'    B8
+'PSW'   D0
+'ACC'   E0
+'B'     F0
+
+--------- Bit equates -----------------------
+'IT0'         88
+'IE0'         89
+'IT1'         8A
+'IE1'         8B
+'TR0'         8C
+'TF0'         8D
+'TR1'         8E
+'TF1'         8F
+'RI'          98
+'TI'          99
+'RB8'         9A
+'TB8'         9B
+'REN'         9C
+'SM2'         9D
+'SM1'         9E
+'SM0'         9F
+'EX0'         A8
+'ET0'         A9
+'EX1'         AA
+'ET1'         AB
+'ES'          AC
+'ET2'         AD
+'WDT'         AE
+'EAL'         AF
+
+
+--------- Locations -------------------------
+'RESET'            0
+'IE0_HND'          3
+'TF0_HND'          0B
+'IE1_HND'          13
+'TF1_HND'          1B
+'RI_TI_HND'        23
+'TF2_HND'          2B
+
+Code segment at 0000-0030
