@@ -55,9 +55,10 @@ struct labelList
 {
   label   * labels;
   unsigned freeLabel;
+  unsigned maxLabels;
 };
 
-#define MAXSEGS    1000
+#define MAXSEGS	   2000
 #define MAXENTRIES 2000
 #define MAXCODELABELS  (0xFF00 / sizeof(label))
 #define MAXXRAMLABELS  MAXCODELABELS

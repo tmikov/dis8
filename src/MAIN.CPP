@@ -164,7 +164,7 @@ void readOptions ( void )
 
 int main(int argc, char ** argv)
 {
-  puts("DIS31 for 8031. Version 0.3. Copyright (c) Tse-Tso & Stan-Jo, 1996");
+  puts("DIS31 for 8031. Version 0.5. Copyright (c) Tse-Tso & Stan-Jo, 1996-1997");
   if (argc == 1)
   {
     puts("Syntax:  DIS31 filename[.BIN]");

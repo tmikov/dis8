@@ -137,9 +137,13 @@ void initAll ( void )
   codeSegs = new segment[MAXSEGS];
   entries  = new ADDRESS[MAXENTRIES];
   codeLabels.labels  = new label[MAXCODELABELS];
+  codeLabels.maxLabels = MAXCODELABELS;
   xRamLabels.labels  = new label[MAXXRAMLABELS];
+  xRamLabels.maxLabels = MAXXRAMLABELS;
   iRamLabels.labels  = new label[MAXIRAMLABELS];
+  iRamLabels.maxLabels = MAXIRAMLABELS;
   bitRamLabels.labels  = new label[MAXBITRAMLABELS];
+  bitRamLabels.maxLabels = MAXBITRAMLABELS;
   freeSeg =
   freeEntry =
   codeLabels.freeLabel =
@@ -158,6 +162,12 @@ unsigned pushLabel ( ADDRESS addr, labType t, labMemory m, labSize s,
 {
   labelList * l = memories[m];
   unsigned res;
+
+  if (l->freeLabel == l->maxLabels)
+  {
+    fprintf( stderr, "Out of label space\n" );
+    abort();
+  }
 
   res = l->freeLabel++;
 
@@ -243,6 +253,12 @@ int addLabel ( ADDRESS addr, labType t, labMemory m, labSize s )
 //---------------------------------------------------------------------------
 void addSegment ( ADDRESS from, ADDRESS to )
 {
+  if (freeSeg == MAXSEGS)
+  {
+    fprintf( stderr, "Out of segment space %u\n", freeSeg );
+    abort();
+  }
+
   codeSegs[freeSeg].from = from;
   codeSegs[freeSeg++].to = to;
   addLabel( from, LabSegment, LabCodeMemory, LabByte );
@@ -268,6 +284,11 @@ BOOL inSegment ( ADDRESS addr )
 //---------------------------------------------------------------------------
 void pushEntry ( ADDRESS addr )
 {
+  if (freeEntry == MAXENTRIES)
+  {
+    fprintf( stderr, "Out of entry space\n" );
+    abort();
+  }
   entries[freeEntry++] = addr;
 };
 
@@ -519,10 +540,17 @@ static BOOL near fixATable ( label * l, ADDRESS to )
 
   for( WORD * p = (WORD *)(Code + l->addr - AbsAddress); len; --len, ++p )
   {
+/*
     if (!addLabel( _rotl( (ADDRESS)*p, 8 ), LabLoc, LabCodeMemory, LabByte ))
     {
       added = TRUE;
-      addEntry((ADDRESS)*p);
+      addEntry( _rotl( (ADDRESS)*p, 8 ) );
+    };
+*/
+    if (!addLabel( _rotl( (ADDRESS)*p, 8 ), LabLoc, LabCodeMemory, LabByte ))
+    {
+      added = TRUE;
+      addEntry( _rotl( (ADDRESS)*p, 8 ) );
     };
   };
   return added;
@@ -808,7 +836,7 @@ static int checkString ( BYTE * c, char * buf, int len )
 static int checkDup ( BYTE * c, int len )
 {
   for (int i = 0; i < len && c[i] == *c; ++i);
-  return i > 7 ? i : 0;
+  return i > 63 ? i : 0;
 };
 
 
