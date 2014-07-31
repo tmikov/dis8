@@ -1,11 +1,13 @@
+#include "compat.h"
 #include <stdio.h>
+#ifdef __TURBOC__
 #include <dir.h>
+#include <io.h>
+#endif
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <io.h>
 #include "sr.h"
-
 
 //********* from SR.CPP  *****************
 extern void pass1(ADDRESS start);
@@ -22,17 +24,17 @@ char errNoMem[] = "Out of memory";
 
 int  haveSDF;
 
-char inFileName[MAXPATH],
-     outFileName[MAXPATH],
-     defFileName[MAXPATH],
-     sdfFileName[MAXPATH];
+const char * inFileName,
+     * outFileName,
+     * defFileName,
+     * sdfFileName;
 
 FILE    * outFile;
 ADDRESS startAddress;
 BOOL    strictJumps;
 
 
-void out(char * mess ...)
+void out(const char * mess ...)
 {
   va_list ap;
   va_start(ap, mess);
@@ -41,7 +43,7 @@ void out(char * mess ...)
 };
 
 
-void error(char * mess ...)
+void error(const char * mess ...)
 {
   va_list ap;
   va_start(ap, mess);
@@ -56,6 +58,8 @@ void error(char * mess ...)
 
 static void near getFileName ( char * name )
 {
+#if __MSDOS__
+  static char tmp[MAXPATH];
   char drv[MAXDRIVE],
        dir[MAXDIR],
        file[MAXFILE],
@@ -65,16 +69,48 @@ static void near getFileName ( char * name )
   if (strcmp(ext, ".SDF") == 0)
   {
     haveSDF = 1;
-    fnmerge(inFileName, drv, dir, file, ".BIN");
-    fnmerge(sdfFileName, drv, dir, file, ".SDF");
+    fnmerge(tmp, drv, dir, file, ".BIN");
+    inFileName = strdup(tmp);
+    fnmerge(tmp, drv, dir, file, ".SDF");
+    sdfFileName = strdup(tmp);
   }
   else
   {
     haveSDF = 0;
-    fnmerge(inFileName, drv, dir, file, *ext ? ext : ".BIN");
+    fnmerge(tmp, drv, dir, file, *ext ? ext : ".BIN");
+    inFileName = strdup(tmp);
   };
-  fnmerge(outFileName, drv, dir, file, ".SRC");
-  fnmerge(defFileName, drv, dir, file, ".DEF");
+  fnmerge(tmp, drv, dir, file, ".SRC");
+  outFileName = strdup(tmp);
+  fnmerge(tmp, drv, dir, file, ".DEF");
+  defFileName = strdup(tmp);
+#else
+  size_t len = strlen( name );
+  const char * ext = strrchr( name, '.' );
+  char * tmp;
+  if (ext && strcmp(ext, ".sdf")==0)
+  {
+    haveSDF = 1;
+    tmp = (char *)malloc(ext - name + 4 + 1);
+    memcpy( tmp, name, ext - name );
+    strcpy( tmp+(ext - name), ".bin" );
+    inFileName = tmp;
+    sdfFileName = strdup(name);
+  }
+  else
+  {
+    haveSDF = 0;
+    if (ext)
+      inFileName = name;
+    else
+    {
+      tmp = (char *)malloc(len+4+1);
+      memcpy( tmp, name, len );
+      strcpy( tmp+len, ".bin" );
+      inFileName = tmp;
+    }
+  }
+#endif
 };
 
 int freadLong(BYTE huge * buf, long len, FILE * f)
@@ -107,7 +143,7 @@ static void near readFile ( void )
   fclose(f);
 };
 
-int myScanf(char * format ...)
+int myScanf(const char * format ...)
 {
   char buf[256];
   va_list ap;

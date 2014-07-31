@@ -12,6 +12,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include "compat.h"
 #include "sr.h"
 
 #pragma warn -pia
@@ -21,7 +22,7 @@ extern char     sdfFileName[];
 extern ADDRESS  startAddress;
 
 
-extern void error(char * mess...);
+extern void error(const char * mess...);
 
 //******** from SR.CPP
 extern labelList codeLabels;
@@ -69,7 +70,7 @@ static int readLine ( void )
   return 1;
 };
 
-static int match ( char * m )
+static int match ( const char * m )
 {
   int l;
   skipBlanks();
@@ -81,7 +82,7 @@ static int match ( char * m )
   return 0;
 };
 
-static int matchSeq(char * first ...)
+static int matchSeq(const char * first ...)
 {
   char * oldLine;
   va_list ap;
@@ -96,7 +97,7 @@ static int matchSeq(char * first ...)
       return 0;
     };
   }
-  while (first = va_arg(ap, char *));
+  while (first = va_arg(ap, const char *));
 
   va_end(ap);
   return 1;

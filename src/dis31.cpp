@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#include "compat.h"
 #include "dis31.h"
 
 char Strings[][6] =

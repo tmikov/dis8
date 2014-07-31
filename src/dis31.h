@@ -10,7 +10,7 @@
 
 typedef unsigned char BYTE;
 typedef signed char   SBYTE;
-typedef unsigned int  WORD;
+typedef unsigned short WORD;
 typedef int           BOOL;
 typedef WORD          ADDRESS;
 

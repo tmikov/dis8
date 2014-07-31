@@ -11,13 +11,16 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef __TURBOC__
 #include <mem.h>
+#endif
+#include "compat.h"
 #include "sr.h"
 
 #pragma warn -pia
 
 //*** from MAIN.CPP *****************************
-extern void     out(char * mess ...);
+extern void     out(const char * mess ...);
 extern char     inFileName[];
 extern ADDRESS  startAddress;
 extern BOOL     strictJumps;
@@ -54,7 +57,7 @@ static char lineBuf[128];
 //
 // Description    Returns a pointer to label size description
 //---------------------------------------------------------------------------
-static char * genLabSize ( label * l )
+static const char * genLabSize ( label * l )
 {
   int s = l->size;
   switch (s)
@@ -77,7 +80,7 @@ static char * genLabSize ( label * l )
 //---------------------------------------------------------------------------
 static char * genLabel ( label * l )
 {
-  static char Prefixes[][4][16] =
+  static const char Prefixes[][4][16] =
   {
     { "###_",    "###_",     "###_",     "###_" },
     { "###_",    "###_",     "###_",     "###_" },
@@ -541,16 +544,16 @@ static BOOL near fixATable ( label * l, ADDRESS to )
   for( WORD * p = (WORD *)(Code + l->addr - AbsAddress); len; --len, ++p )
   {
 /*
-    if (!addLabel( _rotl( (ADDRESS)*p, 8 ), LabLoc, LabCodeMemory, LabByte ))
+    if (!addLabel( rotl16( (ADDRESS)*p, 8 ), LabLoc, LabCodeMemory, LabByte ))
     {
       added = TRUE;
-      addEntry( _rotl( (ADDRESS)*p, 8 ) );
+      addEntry( rotl16( (ADDRESS)*p, 8 ) );
     };
 */
-    if (!addLabel( _rotl( (ADDRESS)*p, 8 ), LabLoc, LabCodeMemory, LabByte ))
+    if (!addLabel( rotl16( (ADDRESS)*p, 8 ), LabLoc, LabCodeMemory, LabByte ))
     {
       added = TRUE;
-      addEntry( _rotl( (ADDRESS)*p, 8 ) );
+      addEntry( rotl16( (ADDRESS)*p, 8 ) );
     };
   };
   return added;
@@ -823,7 +826,8 @@ static int curLabel;
 //---------------------------------------------------------------------------
 static int checkString ( BYTE * c, char * buf, int len )
 {
-  for (int i = 0;i < len && c[i] >= ' ' && c[i] <= 'z'; *buf++ = c[i++]);
+  int i;
+  for (i = 0;i < len && c[i] >= ' ' && c[i] <= 'z'; *buf++ = c[i++]);
   *buf = 0;
   return i > 3 ? i : 0;
 };
@@ -835,7 +839,8 @@ static int checkString ( BYTE * c, char * buf, int len )
 //---------------------------------------------------------------------------
 static int checkDup ( BYTE * c, int len )
 {
-  for (int i = 0; i < len && c[i] == *c; ++i);
+  int i;
+  for (i = 0; i < len && c[i] == *c; ++i);
   return i > 63 ? i : 0;
 };
 
@@ -912,7 +917,7 @@ static void near genWordDump ( ADDRESS from, ADDRESS to, int printLocs)
       out("\tWORD\t");
     else
       out(", ");
-    if (printLocs && (l = searchLabel( &codeLabels, _rotl( (ADDRESS)*c, 8 )) ))
+    if (printLocs && (l = searchLabel( &codeLabels, rotl16( (ADDRESS)*c, 8 )) ))
       out(referLabel(l));
     else
       out("%s", GenHex( buf, *c, LabWord ));
@@ -1061,7 +1066,6 @@ void genCode ( void )
     from = codeSegs[i].to+1;
     for(long addr = codeSegs[i].from; addr <= codeSegs[i].to;)
     {
-      char  buf[50];
       printLabel((ADDRESS)addr);
       addr += GenSingle( (ADDRESS)addr );
       out( ResultBuffer );
@@ -1117,7 +1121,7 @@ void genLabDef ( label * l, BOOL genSize )
   out("\n");
 };
 
-static void near genDefSection ( char * name, labelList * l, labType t,
+static void near genDefSection ( const char * name, labelList * l, labType t,
                                  BOOL genSize )
 {
   int i;

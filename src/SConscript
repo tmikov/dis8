@@ -1,0 +1,10 @@
+Import("env")
+
+env.Program( "dis31", [
+  "compat.c",
+  "main.cpp",
+  "readsdf.cpp",
+  "dis31.cpp",
+  "sr.cpp",
+])
+
