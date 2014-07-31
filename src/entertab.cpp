@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#ifdef __TURBOC__
 #include <conio.h>
+#endif
 #include <stdlib.h>
 
+#include "compat.h"
 #include "dis31.h"
 
 #define NELEM( x )  (sizeof( x ) / sizeof( (x)[0] ))
@@ -44,7 +47,7 @@ int EnterString ( void )
   return AddString( buf );
 };
 
-static char * AddrModes[] =
+static const char * AddrModes[] =
 {
   "AUnknown",
   "ABit",
@@ -104,7 +107,8 @@ void EnterCode ( char * code )
     strupr( buf );
     if (strlen( buf ) != 8)
       continue;
-    for( int i = 0; i < 8; ++i )
+    int i;
+    for( i = 0; i < 8; ++i )
       if (strchr( "01X", buf[i] ) == NULL)
         i = 10;
     if (i == 8)
@@ -178,9 +182,12 @@ void gen ( void )
   fclose( f );
 };
 
-void main ( void )
+int main ( void )
 {
+#ifdef __TURBOC__
   clrscr();
+#endif
   while (EnterInstruction());
   gen();
+  return 0;
 };

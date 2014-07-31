@@ -8,3 +8,4 @@ env.Program( "dis31", [
   "sr.cpp",
 ])
 
+env.Program( "entertab", ["entertab.cpp", "compat.c"] )

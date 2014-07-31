@@ -18,6 +18,7 @@ long filelength ( int fd );
 char * strupr ( char * s );
 char * strlwr ( char * s );
 
+int stricmp ( const char * s1, const char * s2 );
 int strnicmp ( const char * s1, const char * s2, size_t maxlen);
 #define strncmpi( s1, s2, maxlen) strnicmp( s1, s2, maxlen )
 

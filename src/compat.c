@@ -39,6 +39,17 @@ char * strlwr ( char * s )
   return res;
 }
 
+int stricmp ( const char * s1, const char * s2 )
+{
+  for( ; *s1 && *s2; ++s1, ++s2 )
+  {
+    int d;
+    if ( (d = toupper(*s1) - toupper(*s2)) != 0)
+      return d;
+  }
+  return toupper(*s1) - toupper(*s2);
+}
+
 int strnicmp ( const char * s1, const char * s2, size_t maxlen )
 {
   if (maxlen == 0)
