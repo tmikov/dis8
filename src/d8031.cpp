@@ -1,11 +1,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __TURBOC__
 #include <alloc.h>
 #include <io.h>
-#include <ctype.h>
 #include <conio.h>
+#else
+#include <unistd.h>
+#endif
+#include <ctype.h>
+#include <fcntl.h>
 
+#include "compat.h"
 #include "dis31.h"
 
 BYTE get_instr ( unsigned i, char * buf )
@@ -29,7 +35,7 @@ void load_file ( void )
     farfree(Code);
   printf("Enter file name: ");
   scanf("%s", name);
-  if ( (f = _open(name, 0)) == -1 )
+  if ( (f = open(name, O_RDONLY)) == -1 )
   {
     printf(" *** Sorry, file not found. Do you know what DIR means?\n\n");
     return;
@@ -47,12 +53,12 @@ void load_file ( void )
 
   if (s <= 0xFF00)
   {
-    if (_read( f, (void *)Code, s ) == -1)
+    if (read( f, (void *)Code, s ) == -1)
       goto errExit;
   }
   else
   {
-    if(_read(f,(void*)Code,0xFF00)==-1||_read(f,(void *)((BYTE huge *)Code+0xFF00),0xFF00)==-1)
+    if(read(f,(void*)Code,0xFF00)==-1||read(f,(void *)((BYTE huge *)Code+0xFF00),0xFF00)==-1)
     {
 errExit:
       printf(" *** What's the matter with this fucking file? I can't read it!\n\n");
@@ -60,9 +66,9 @@ errExit:
     };
   };
 
-  _close( f );
+  close( f );
   printf("Tell me the absolute address(hex): ");
-  scanf("%X", &AbsAddress);
+  scanf("%hX", &AbsAddress);
   printf("So far, so good...\n\n");
   codesize = s - 1;
 };
@@ -146,7 +152,8 @@ void goto_address ( void )
 
 void dump_screen ( void )
 {
-  BYTE buf[80], niz[20], c;
+  char buf[80], niz[20];
+  BYTE c;
   unsigned bpos, i, lines, z;
 
   for(i = curaddr & 0xFFF0, lines = 0; lines < 20; ++lines)
@@ -200,7 +207,8 @@ void dump_screen ( void )
 
 void dump_addr ( void )
 {
-  BYTE buf[80], niz[20], c;
+  char buf[80], niz[20];
+  BYTE c;
   unsigned bpos, i, z, s, e;
 
   printf(" Enter start address (16): ");
@@ -210,7 +218,7 @@ void dump_addr ( void )
     printf(" *** It is outside the file, Smartass!\n\n");
     return;
   };
-  printf(" А ▒ега к░айни┐ (16): ");
+  printf(" Enter end address (16): ");
   scanf("%X", &e);
   if (e < AbsAddress || e > codesize + AbsAddress || e < s)
   {
@@ -276,7 +284,7 @@ void dump_addr ( void )
 
 void main_loop ( void )
 {
-  static char * shits[5] =
+  static const char * shits[5] =
   {
     "Fuck YOU!",
     "Go kill yourself!",
@@ -289,8 +297,13 @@ void main_loop ( void )
   while (1)
   {
     printf(">");
-    key = toupper( getche() );
+#if __MSDOS__
+    key = getche();
     printf("\n");
+#else
+    key = getchar();
+#endif
+    key = toupper(key);
     if (isspace(key))
       continue;
     switch ( key )
@@ -339,14 +352,14 @@ void main_loop ( void )
         puts("  H - Only for fools");
         puts("  Q - End. Press this immediately!");
         puts("  U - Disassemble a screen");
-        puts("  А - Disassemble from address to address");
+        puts("  A - Disassemble from address to address");
         puts("  G - Go to address");
         puts("  D - Dupm a screen");
         puts("  S - Dump from address to address");
         puts("  L - Load bin file\n");
         break;
 
-      case 'Q':
+      case 'Q': case -1:
         if (Code)
           farfree( Code );
         printf(" It was high time. Have mercy, don't run me!\n\n");
@@ -354,7 +367,7 @@ void main_loop ( void )
 
       default:
         printf("*** Unrecognized command!!! (I knew it...)***\n");
-        printf("*** %s\n\n", shits[random(5)]);
+        printf("*** %s\n\n", shits[rand()%5]);
         break;
     };
   };

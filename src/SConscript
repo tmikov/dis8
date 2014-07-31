@@ -9,3 +9,5 @@ env.Program( "dis31", [
 ])
 
 env.Program( "entertab", ["entertab.cpp", "compat.c"] )
+
+env.Program( "d8031", ["d8031.cpp", "dis31.cpp", "compat.c"] )

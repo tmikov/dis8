@@ -30,6 +30,9 @@ unsigned short rotr16 ( unsigned short val, int count );
 
 #define setmem(dest,length,value) memset(dest, (char)(value), length)
 
+#define farmalloc(ptr)  malloc(ptr)
+#define farfree(ptr)    free(ptr)
+
 #else
 #define rotl16(val,count) _rotl( val, count )
 #define rotr16(val,count) _rotr( val, count )
