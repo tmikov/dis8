@@ -1,9 +1,17 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef __TURBOC__
 #include <alloc.h>
 #include <io.h>
+#include <conio.h>
+#else
+#include <unistd.h>
+#endif
+#include <fcntl.h>
 #include <ctype.h>
+
+#include "compat.h"
 
 typedef unsigned char uchar;
 
@@ -546,7 +554,7 @@ void load_file ( void )
     free(code);
   printf("Я ╖│кни име▓о на ┤айла: ");
   scanf("%s", name);
-  if ( (f = _open(name, 0)) == -1 )
+  if ( (f = open(name, O_RDONLY)) == -1 )
   {
     printf(" *** Sorry, мой ╖овек. Т│й ┤айл╖е го нема...\n\n");
     return;
@@ -564,12 +572,12 @@ void load_file ( void )
 
   if (s <= 0xFF00)
   {
-    if (_read( f, code, s ) == -1)
+    if (read( f, code, s ) == -1)
       goto errExit;
   }
   else
   {
-    if(_read(f,code,0xFF00)==-1||_read(f,(uchar huge *)code+0xFF00,0xFF00)==-1)
+    if(read(f,code,0xFF00)==-1||read(f,(uchar huge *)code+0xFF00,0xFF00)==-1)
     {
 errExit:
       printf(" *** Файл║▓ май не ▓и е на░ед. Не мога да го п░о╖е▓а.\n\n");
@@ -577,7 +585,7 @@ errExit:
     };
   };
 
-  _close( f );
+  close( f );
   printf("Я ▒ега ми кажи, кой е аб▒ол╛▓ни┐▓ ад░е▒ (╕е▒▓най▒е▓и╖ен): ");
   scanf("%X", &cstart);
   printf("До▓│к доб░е...\n\n");
@@ -663,7 +671,8 @@ void goto_address ( void )
 
 void dump_screen ( void )
 {
-  uchar buf[80], niz[20], c;
+  char buf[80], niz[20];
+  uchar c;
   unsigned bpos, i, lines, z;
 
   for(i = curaddr & 0xFFF0, lines = 0; lines < 20; ++lines)
@@ -717,7 +726,8 @@ void dump_screen ( void )
 
 void dump_addr ( void )
 {
-  uchar buf[80], niz[20], c;
+  char buf[80], niz[20];
+  uchar c;
   unsigned bpos, i, z, s, e;
 
   printf(" Я ми дай на╖ални┐ ад░е▒ (16): ");
@@ -806,8 +816,13 @@ void main_loop ( void )
   while (1)
   {
     printf(">");
-    key = toupper( getche() );
+#if __MSDOS__
+    key = getche();
     printf("\n");
+#else
+    key = getchar();
+#endif
+    key = toupper( key );
     if (isspace(key))
       continue;
     switch ( key )
@@ -856,7 +871,7 @@ void main_loop ( void )
         puts("  H - Извежда помо╣");
         puts("  Q - К░ай на п░ог░ама▓а");
         puts("  U - Диза▒ембли░а един ек░ан ин▒▓░│к╢ии");
-        puts("  А - Диза▒ембли░а о▓ ад░е▒ до ад░е▒");
+        puts("  A - Диза▒ембли░а о▓ ад░е▒ до ад░е▒");
         puts("  G - О▓ива на ад░е▒");
         puts("  D - Д║мпва един ек░ан");
         puts("  S - Д║мпва о▓ ад░е▒ до ад░е▒");
@@ -872,7 +887,7 @@ void main_loop ( void )
 
       default:
         printf("*** Непозна▓а команда!!! ***\n");
-        printf("*** %s\n\n", shits[random(5)]);
+        printf("*** %s\n\n", shits[rand()%5]);
         break;
     };
   };
@@ -888,6 +903,7 @@ int main(void)
   curaddr = 0;
 
   main_loop();
+  return 0;
 };
 
 /*
@@ -900,12 +916,12 @@ int main(void)
 
   printf("Enter file name : ");
   scanf("%s", name);
-  if ((f = _open( name, 0 )) == -1)
+  if ((f = open( name, O_RDONLY )) == -1)
     return -1;
 
   if ((code = malloc(s = filelength(f)))==NULL)
     return -1;
-  if (!_read( f, code, s))
+  if (!read( f, code, s))
     return -1;
 
   printf("Enter absolute start address: ");
@@ -923,6 +939,6 @@ int main(void)
     printf("\t%s\n", name);
   }
   while ( i < s );
-  _close( f );
+  close( f );
   return 0;
-};*/
+};*/
