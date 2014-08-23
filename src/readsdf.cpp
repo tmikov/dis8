@@ -18,7 +18,7 @@
 #pragma warn -pia
 
 //******** from MAIN.CPP
-extern char     sdfFileName[];
+extern char     * sdfFileName;
 extern ADDRESS  startAddress;
 
 

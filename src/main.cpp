@@ -86,16 +86,27 @@ static void near getFileName ( char * name )
   defFileName = strdup(tmp);
 #else
   size_t len = strlen( name );
-  const char * ext = strrchr( name, '.' );
-  char * tmp;
+  char * ext = strrchr( name, '.' );
+  char * file;
+
+  if (ext)
+  {
+    file = (char *)malloc(ext - name + 4 + 1);
+    memcpy( file, name, ext - name );
+    strcpy( file+(ext - name), ".bin" );
+  }
+  else
+  {
+    file = (char *)malloc(len + 4 + 1);
+    memcpy( file, name, len );
+    strcpy( file+len, ".bin" );
+  }
+
   if (ext && strcmp(ext, ".sdf")==0)
   {
     haveSDF = 1;
-    tmp = (char *)malloc(ext - name + 4 + 1);
-    memcpy( tmp, name, ext - name );
-    strcpy( tmp+(ext - name), ".bin" );
-    inFileName = tmp;
-    sdfFileName = strdup(name);
+    inFileName = strdup(file);
+    sdfFileName = name;
   }
   else
   {
@@ -103,14 +114,16 @@ static void near getFileName ( char * name )
     if (ext)
       inFileName = name;
     else
-    {
-      tmp = (char *)malloc(len+4+1);
-      memcpy( tmp, name, len );
-      strcpy( tmp+len, ".bin" );
-      inFileName = tmp;
-    }
+      inFileName = strdup(file);
   }
-#endif
+
+  ext = strrchr( file, '.' );
+  strcpy( ext, ".src" );
+  outFileName = strdup(file);
+  strcpy( ext, ".def" );
+  defFileName = strdup(file);
+  free(file);
+  #endif
 };
 
 int freadLong(BYTE huge * buf, long len, FILE * f)
